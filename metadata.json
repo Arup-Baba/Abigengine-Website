@@ -1,0 +1,8 @@
+{
+  "name": "Copy of  A big engine website-tested ok proto 5",
+  "description": "A clean, modern landing page for a car washing service,otp integration,with product image integration,order history,user data ,car database configuration,service data configuration,login Funtionalites,bulk data processing for services,user profile ehancement,review button in my order page,custom otp page, slug based pages",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "prompt": ""
+}

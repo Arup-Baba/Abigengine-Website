@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Washing Service</title>
+    
+    <link rel="preload" href="https://pub-d1d6c35dc7024f819f155246a42ea32b.r2.dev/bigengine%203.png" as="image">
+    <link rel="preload" href="index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="index.css"></noscript>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="importmap">
+        {
+          "imports": {
+            "@google/genai": "https://esm.sh/@google/genai@^1.10.0"
+          }
+        }
+    </script>
+    <script type="module" src="index.js"></script>
+    <style>
+        :root, body[data-theme="default"] {
+            --brand-primary: #0A2647; --brand-accent: #e63946; --text-primary: #222;
+            --text-secondary: #555; --text-inverted: #ffffff; --bg-primary: #f4f5f7;
+            --bg-secondary: #ffffff; --bg-tertiary: #f9f9fa; --border-tertiary: #f0f0f0; --text-link: #0A2647;
+        }
+        *{ margin: 0; padding: 0; box-sizing: border-box; text-decoration: none; list-style: none; font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; }
+        body { background-color: var(--bg-primary); color: var(--text-primary); }
+        .hidden { display: none !important; }
+        #initial-loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-secondary); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
+        #initial-loading-screen.hidden { opacity: 0; visibility: hidden; }
+        #initial-loading-screen .loading-content { text-align: center; }
+        #initial-loading-screen .loading-logo { width: 150px; margin-bottom: 20px; animation: pulse 2s infinite ease-in-out; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.4)); }
+        #initial-loading-screen .loading-spinner { width: 50px; height: 50px; border: 5px solid var(--border-tertiary); border-top-color: var(--brand-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+        #initial-loading-screen .loading-text { font-size: 18px; color: var(--text-secondary); font-weight: 500; }
+        nav { background: var(--bg-secondary); padding: 15px 5%; width: 100%; position: fixed; left: 0; top: 0; z-index: 100; display: flex; justify-content: center; align-items: center; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
+        .logo img { height: 48px; object-fit: contain; opacity: 0; animation: logoAni 1s ease forwards; }
+        .nav-menu { display: flex; align-items: center; gap: 40px; }
+        .nav-actions { display: flex; align-items: center; gap: 20px; }
+        .nav-link { display: flex; align-items: center; list-style: none; gap: 20px; }
+        .nav-link li { animation: NavliaAni forwards 1s ease; animation-delay: calc(.2s * var(--i)); opacity: 0; }
+        .nav-link a { text-decoration: none; color: var(--text-link); font-weight: 600; }
+        .nav-link a.active { color: var(--brand-accent); font-weight: 700; }
+        .extras { display: flex; align-items: center; gap: 20px; animation: socialAni forwards 1s ease; animation-delay: 0.8s; opacity: 0; }
+        .hamburger-btn { display: none; font-size: 24px; background: transparent; border: none; cursor: pointer; }
+        @media (max-width: 992px) { .hamburger-btn { display: block; } .nav-menu { display: none; } }
+        header { width: 100%; min-height: 90vh; padding: 150px 0 50px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: radial-gradient(ellipse at bottom, var(--bg-tertiary) 0%, var(--bg-secondary) 100%); text-align: center; }
+        .header-container { display: flex; justify-content: center; align-items: center; height: 100%; }
+        .header-left { max-width: 750px; position: relative; }
+        .header-left h1 { font-size: 58px; line-height: 1.2; color: var(--text-primary); animation: H1Ani forwards 1s ease; opacity: 0; animation-delay: 1s; }
+        .header-left h3 { font-size: 42px; font-weight: 400; color: var(--brand-primary); margin-top: .5rem; animation: H1Ani forwards 1s ease; opacity: 0; animation-delay: .8s; }
+        .header-left p { margin: 20px auto 35px; line-height: 1.6; font-size: 18px; max-width: 600px; color: var(--text-secondary); animation: H1Ani forwards 1s ease; opacity: 0; animation-delay: .6s; }
+        .btn{ display: inline-block; width: fit-content; padding: 12px 28px; background: var(--brand-primary); border: 2px solid var(--brand-primary); border-radius: 4px; color: var(--text-inverted); font-weight: 600; opacity: 0; animation: H1Ani 1s ease forwards; animation-delay: 1.3s; }
+        @media (max-width: 768px) { header { padding-top: 120px; } .header-left h1 { font-size: 40px; } .header-left h3 { font-size: 28px; } .header-left p { font-size: 16px; } }
+        @media (max-width: 576px) { .header-left h1 { font-size: 32px; } .header-left h3 { font-size: 26px; } .header-left p { font-size: 15px; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes logoAni { 0% { transform: translateX(-100px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes H1Ani { 0% { transform: translateY(100px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes NavliaAni { 0% { transform: translateX(100px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes socialAni { 0% { transform: translateY(-100px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+    <div id="initial-loading-screen">
+        <div class="loading-content">
+            <img src="https://pub-d1d6c35dc7024f819f155246a42ea32b.r2.dev/bigengine%201.png" alt="A Big Engine Logo" class="loading-logo">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Tuning up your experience...</p>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <img src="https://pub-d1d6c35dc7024f819f155246a42ea32b.r2.dev/bigengine%203.png" alt="A Big Engine Logo">
+                
+            </div>
+
+            <div class="nav-menu" id="nav-menu">
+                <ul class="nav-link">
+                    <li style="--i:1;"><a href="/home" class="active" id="nav-home">Home</a></li>
+                    <li style="--i:2;"><a href="/services" id="nav-services">Services</a></li>
+                    <li style="--i:3;"><a href="#">About Us</a></li>
+                </ul>
+                <ul class="social-link">
+                    <li style="--i:1;"><a href="#"><i class="fab fa-facebook"></i></a></li>
+                    <li style="--i:2;"><a href="#"><i class="fab fa-instagram"></i></a></li>
+                </ul>
+            </div>
+
+            <div class="nav-actions">
+                <div class="extras">
+                    <div class="car-selector-trigger" id="car-selector-trigger">
+                        <div class="car-info">
+                            <i class="fas fa-car-alt"></i>
+                            <span>Select Your Car</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+
+                    <div class="cart-icon-container" id="cart-icon-container" aria-label="View Cart" role="button"
+                        tabindex="0">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-item-count" class="cart-item-count hidden">0</span>
+                    </div>
+
+                    <button id="profile-action-btn" class="profile-section profile-button">
+                        <div id="logged-out-view" class="profile-state-view">
+                            <i class="fas fa-user-circle"></i>
+                            <span>My Profile</span>
+                        </div>
+                        <div id="logged-in-view" class="profile-state-view hidden">
+                            <i class="fas fa-user-circle"></i>
+                            <span id="user-display">My Profile</span>
+                        </div>
+                    </button>
+                </div>
+                <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ..................End Navbar................... -->
+
+    <div id="page-content">
+        <div id="home-content">
+            <!-- ..................Start Header Section................... -->
+            <header>
+                <div class="container header-container">
+                    <div class="header-left">
+                        <h1>Car washing Experience.</h1>
+                        <h3>Redefined!</h3>
+                        <p>
+                           Redefining car care with quality, convenience, and trust. Your vehicle deserves the best, and we deliver it right to your doorstep.
+                        </p>
+                        <a href="/services" class="btn" id="explore-btn">Explore Services</a>
+                    </div>
+                </div>
+            </header>
+            <!-- ..................End Header Section................... -->
+
+            <!-- ..................Start Services Section................... -->
+            <section class="services-section" id="services-section">
+                <h2>Select a Service</h2>
+                <div class="services-grid">
+                    <a href="/services/car-wash" class="service-box" data-service="Car Wash"><i class="fas fa-soap"></i>
+                        <div>Car Wash</div>
+                    </a>
+                    <a href="/services/tyre-replacement" class="service-box" data-service="Tyre Replacement"><i class="fas fa-sync-alt"></i>
+                        <div>Tyre Replacement</div>
+                    </a>
+                    <a href="/services/battery-replacement" class="service-box" data-service="Battery Replacement"><i class="fas fa-car-battery"></i>
+                        <div>Battery Replacement</div>
+                    </a>
+                    <a href="#" class="service-box" data-service="Servicing"><i class="fas fa-wrench"></i>
+                        <div>Servicing</div>
+                    </a>
+                    <a href="/services/car-care" class="service-box" data-service="Car Care"><i class="fas fa-broom"></i>
+                        <div>Car Care</div>
+                    </a>
+                    <a href="#" class="service-box" data-service="Accessories"><i class="fas fa-tools"></i>
+                        <div>Accessories</div>
+                    </a>
+                    <a href="#" class="service-box" data-service="Spare Parts"><i class="fas fa-cogs"></i>
+                        <div>Spare Parts</div>
+                    </a>
+                </div>
+            </section>
+            <!-- ..................End Services Section................... -->
+
+            <!-- ..................Start Banners Section................... -->
+            <section class="reels-section hidden" id="banner-section">
+                <div class="container">
+                    <div class="banner-container" id="banner-container">
+                        <!-- Banners will be injected here -->
+                    </div>
+                    <div class="banner-progress-bar-container hidden">
+                        <div id="banner-progress-bar" class="banner-progress-bar"></div>
+                    </div>
+                </div>
+            </section>
+            <!-- ..................End Banners Section................... -->
+
+            <!-- ..................Start Reels Section................... -->
+            <section class="reels-section hidden" id="reels-section">
+                <div class="container">
+                    <h2 class="reels-title">Showcasing Our Services</h2>
+                    <p class="reels-subtitle">Watch our experts in action.</p>
+                    <div class="reels-container" id="reels-container">
+                        <!-- Reels will be injected here -->
+                    </div>
+                </div>
+            </section>
+            <!-- ..................End Reels Section................... -->
+            
+            <!-- ..................Start Testimonials Section................... -->
+            <section class="reels-section hidden" id="testimonials-section">
+                <div class="container">
+                    <h2 class="reels-title">What Our Customers Say</h2>
+                    <p class="reels-subtitle">Real feedback from our happy clients.</p>
+                    <div class="reels-container" id="testimonials-container">
+                        <!-- Testimonials will be injected here -->
+                    </div>
+                </div>
+            </section>
+            <!-- ..................End Testimonials Section................... -->
+
+            <!-- ..................Start How It Works Section................... -->
+            <section class="how-it-works" id="how-it-works">
+                <h2>How It Works</h2>
+                <div class="how-grid">
+                    <div class="how-box">
+                        <i class="fas fa-cogs"></i>
+                        <h3>Select a Service</h3>
+                        <p>Choose your preferred car service with ease.</p>
+                    </div>
+                    <div class="how-box">
+                        <i class="fas fa-calendar-check"></i>
+                        <h3>Book a Slot</h3>
+                        <p>Pick a convenient time to get your service.</p>
+                    </div>
+                    <div class="how-box">
+                        <i class="fas fa-truck"></i>
+                        <h3>Door-step Care</h3>
+                        <p>We reach your location for pickup and delivery.</p>
+                    </div>
+                </div>
+            </section>
+            <!-- ..................End How It Works Section................... -->
+        </div>
+
+        <div id="car-wash-content" class="hidden">
+            <main class="service-page-container">
+                <h1>Car Wash</h1>
+                <div class="service-packages-list">
+                    <!-- Service cards are now generated dynamically -->
+                </div>
+            </main>
+        </div>
+        
+        <div id="battery-replacement-content" class="hidden">
+            <main class="service-page-container">
+                <h1>Battery Replacement</h1>
+                <div class="service-packages-list">
+                    <!-- Service cards are now generated dynamically -->
+                </div>
+            </main>
+        </div>
+
+        <div id="tyre-replacement-content" class="hidden">
+            <main class="service-page-container">
+                <h1>Tyre Replacement</h1>
+                <div id="tyre-filter-bar" class="tyre-filter-bar hidden">
+                    <!-- Tyre filters will be injected here by ui.ts -->
+                </div>
+                <div class="service-packages-grid" id="tyre-services-grid">
+                    <!-- Tyre service cards with image galleries will be generated here -->
+                </div>
+            </main>
+        </div>
+
+        <div id="car-care-content" class="hidden">
+            <main class="service-page-container">
+                <h1>Car Care</h1>
+                <div class="service-packages-list">
+                    <!-- Service cards are now generated dynamically -->
+                </div>
+            </main>
+        </div>
+
+        <div id="my-order-content" class="hidden">
+            <main class="service-page-container">
+                <h1>My Cart</h1>
+                <div id="order-view-container">
+                    <!-- This content is dynamically generated -->
+                </div>
+            </main>
+        </div>
+        
+        <div id="my-orders-list-content" class="hidden">
+            <main class="service-page-container">
+                <h1>My Orders</h1>
+                <div id="orders-list-view-container">
+                    <!-- This content is dynamically generated -->
+                </div>
+            </main>
+        </div>
+
+        <div id="order-details-content" class="hidden">
+             <main class="service-page-container checkout-container">
+                 <div id="checkout-progress-bar-container"></div>
+                 <h1>Review Order Details</h1>
+                 <div id="order-details-view-container">
+                    <!-- This content is dynamically generated -->
+                 </div>
+             </main>
+        </div>
+
+        <div id="payment-method-content" class="hidden">
+            <main class="service-page-container checkout-container">
+                <div id="checkout-progress-bar-container-payment"></div>
+                <h1>Select Payment Method</h1>
+                <div id="payment-method-view-container">
+                   <!-- This content is dynamically generated -->
+                </div>
+            </main>
+        </div>
+
+        <div id="order-confirmation-content" class="hidden">
+            <main class="service-page-container checkout-container">
+                 <div id="checkout-progress-bar-container-confirmation"></div>
+                 <div id="order-confirmation-view-container">
+                    <!-- This content is dynamically generated -->
+                 </div>
+            </main>
+        </div>
+        
+        <div id="admin-content" class="hidden">
+             <!-- This content is dynamically generated -->
+        </div>
+    </div>
+
+    <!-- ..................Start Footer Section................... -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-col">
+                <div class="logo">
+                     <img src="https://pub-d1d6c35dc7024f819f155246a42ea32b.r2.dev/logo.png.png" alt="A Big Engine Logo" loading="lazy">
+                </div>
+                <p>Redefining car care with quality, convenience, and trust. Your vehicle deserves the best, and we deliver it right to your doorstep.</p>
+                <div class="footer-socials">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="/home" id="footer-nav-home">Home</a></li>
+                    <li><a href="/services" id="footer-nav-services">Services</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="/admin" id="footer-nav-admin">Admin Panel</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Our Services</h4>
+                <ul>
+                    <li><a href="#">Car Wash</a></li>
+                    <li><a href="#">Accessories</a></li>
+                    <li><a href="#">Car Care</a></li>
+                    <li><a href="#">Servicing</a></li>
+                    <li><a href="#">Spare Parts</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Auto Avenue, Car City, 45678</p>
+                <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+                <p><i class="fas fa-envelope"></i> support@abigengine.com</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Theme</h4>
+                <ul class="theme-switcher">
+                    <li><a href="#" data-theme="default">Default</a></li>
+                    <li><a href="#" data-theme="dark">Dark Mode</a></li>
+                    <li><a href="#" data-theme="corporate">Corporate</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 A Big Engine. All Rights Reserved.</p>
+        </div>
+    </footer>
+    <!-- ..................End Footer Section................... -->
+
+    <!-- ..................Start Modals................... -->
+    
+    <!-- Generic media upload inputs -->
+    <input type="file" id="media-upload-image-input" class="hidden" accept="image/*">
+    <input type="file" id="media-upload-video-input" class="hidden" accept="video/*">
+
+    <div id="car-selection-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button id="modal-back-btn" class="modal-nav-btn"><i class="fas fa-arrow-left"></i></button>
+                <h3 id="modal-title">CAR BRAND</h3>
+                <button id="modal-close-btn" class="modal-nav-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modal-body" class="modal-body">
+                <div class="progress-container">
+                    <div class="progress-step" data-step="brand">Brand</div>
+                    <div class="progress-step" data-step="model">Model</div>
+                    <div class="progress-step" data-step="variant">Variant</div>
+                </div>
+                 <div id="modal-search-container" class="modal-search-container hidden">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="modal-search-input" placeholder="Search for brand or model...">
+                </div>
+                <div id="modal-step-content" class="modal-step-content">
+                    <!-- Steps will be dynamically injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="modal-content auth-modal-content">
+            <!-- Step 1: Mobile Number -->
+            <div id="auth-step-mobile">
+                <button id="auth-modal-close-btn" class="modal-nav-btn auth-close-btn"><i class="fas fa-times"></i></button>
+                <div class="auth-header-image">
+                    <img src="https://pub-d1d6c35dc7024f819f155246a42ea32b.r2.dev/Untitled%20design%20(2).png" alt="Delivery Truck" loading="lazy">
+                </div>
+                <div class="auth-form-container">
+                    <h2>OTP Verification</h2>
+                    <p class="auth-prompt">We will send you a one-time password on this mobile number.</p>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <div class="phone-input-container">
+                            <span>+91</span>
+                            <input type="tel" id="auth-mobile-input" placeholder="Enter Mobile Number" maxlength="10">
+                        </div>
+                        <div id="auth-mobile-error" class="error-message hidden"></div>
+                    </div>
+                    <button id="auth-continue-btn" class="auth-btn">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 2: OTP Entry -->
+            <div id="auth-step-otp" class="hidden">
+                <div class="auth-otp-header">
+                    <button id="auth-back-btn" class="modal-nav-btn"><i class="fas fa-arrow-left"></i></button>
+                </div>
+                 <div class="auth-form-container">
+                    <h2>Verification Code</h2>
+                    <p class="auth-prompt">We have sent the verification code to your mobile number <strong id="auth-otp-prompt-number"></strong></p>
+                    <div class="otp-input-container" id="otp-inputs">
+                        <input type="tel" class="otp-input" maxlength="1">
+                        <input type="tel" class="otp-input" maxlength="1">
+                        <input type="tel" class="otp-input" maxlength="1">
+                        <input type="tel" class="otp-input" maxlength="1">
+                        <input type="tel" class="otp-input" maxlength="1">
+                        <input type="tel" class="otp-input" maxlength="1">
+                    </div>
+                     <div id="auth-otp-error" class="error-message hidden"></div>
+                    <div class="otp-actions">
+                        <button class="link-btn" id="auth-edit-number-btn">Edit Number</button>
+                        <button class="link-btn" id="auth-resend-otp-btn">Resend OTP</button>
+                    </div>
+                    <button id="auth-verify-btn" class="auth-btn">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div id="auth-step-success" class="hidden">
+                 <div class="auth-form-container success-container">
+                    <div class="success-icon-wrapper">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h2>Success!</h2>
+                    <p class="auth-prompt">Congratulations! You have been successfully authenticated.</p>
+                    <button id="auth-success-continue-btn" class="auth-btn">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-page-modal" class="modal-overlay hidden">
+        <div class="modal-content profile-modal-content">
+            <div class="modal-header">
+                <h3 id="profile-modal-title">Profile</h3>
+                <button id="profile-modal-close-btn" class="modal-nav-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body profile-modal-body">
+                <div id="profile-dashboard-view">
+                    <div class="profile-page-main">
+                        <div class="profile-user-card">
+                            <div class="profile-user-avatar"></div>
+                            <div class="profile-user-info">
+                                <h3 id="profile-dashboard-name">User Name</h3>
+                                <p id="profile-dashboard-email">username@example.com</p>
+                            </div>
+                            <button id="profile-edit-btn" class="profile-edit-btn" aria-label="Edit Profile"><i class="fas fa-edit"></i> Edit Profile</button>
+                        </div>
+
+                        <div class="profile-stats-container">
+                            <div class="stat-box">
+                                <span id="profile-cart-count">00</span>
+                                <p>In your cart</p>
+                            </div>
+                            <div class="stat-box">
+                                <span id="profile-wishlist-count">00</span>
+                                <p>In your wishlist</p>
+                            </div>
+                            <div class="stat-box">
+                                <span id="profile-orders-count">00</span>
+                                <p>You ordered</p>
+                            </div>
+                        </div>
+
+                        <div class="profile-actions-container">
+                            <div class="profile-actions-grid">
+                                <div class="action-item" data-action="wallet">
+                                    <i class="fas fa-wallet"></i>
+                                    <p>My Wallet</p>
+                                </div>
+                                <div class="action-item" data-action="orders">
+                                    <i class="fas fa-box-open"></i>
+                                    <p>Orders</p>
+                                </div>
+                                <div class="action-item" data-action="wishlist">
+                                    <i class="fas fa-heart"></i>
+                                    <p>My Wishlist</p>
+                                </div>
+                                <div class="action-item" data-action="coupons">
+                                    <i class="fas fa-tags"></i>
+                                    <p>Coupons</p>
+                                </div>
+                                <div class="action-item" data-action="points">
+                                    <i class="fas fa-trophy"></i>
+                                    <p>Earned Points</p>
+                                </div>
+                                <div class="action-item" data-action="vehicle">
+                                    <i class="fas fa-car"></i>
+                                    <p>My Vehicle</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-links-list">
+                             <div class="link-item" data-action="about">
+                                <i class="fas fa-info-circle"></i>
+                                <p>About Us</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-page-secondary">
+                        <div class="profile-support-list">
+                            <div class="support-item" data-action="help">
+                                <i class="fas fa-question-circle"></i>
+                                <p>Help Centre</p>
+                            </div>
+                            <div class="support-item" data-action="faq">
+                                <i class="fas fa-question-circle"></i>
+                                <p>FAQ</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="profile-logout-section">
+                        <button id="profile-dashboard-logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                </div>
+                <div id="profile-edit-view" class="hidden">
+                    <form id="user-details-form" novalidate>
+                        <div class="form-group">
+                            <label for="first-name">First Name</label>
+                            <input type="text" id="first-name" name="firstName" class="form-group-input" placeholder="Enter your first name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Last Name</label>
+                            <input type="text" id="last-name" name="lastName" class="form-group-input" placeholder="Enter your last name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile-number">Mobile Number</label>
+                            <input type="text" id="mobile-number" name="mobile" class="form-group-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="car-details">Car Brand & Model</label>
+                            <input type="text" id="car-details" name="carBrandModel" class="form-group-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="car-number">Car Number</label>
+                            <input type="text" id="car-number" name="carNumber" class="form-group-input" placeholder="e.g., MH 01 AB 1234">
+                        </div>
+                        <div class="form-group">
+                             <div class="form-label-with-action">
+                                <label for="address-street">Street Address</label>
+                                <button type="button" id="get-location-btn" class="text-btn"><i class="fas fa-map-marker-alt"></i> Use Current Location</button>
+                            </div>
+                            <input type="text" id="address-street" name="street" class="form-group-input" placeholder="e.g., 123 Main St" required>
+                        </div>
+                         <div class="form-group">
+                            <label for="address-city">City</label>
+                            <input type="text" id="address-city" name="city" class="form-group-input" placeholder="e.g., Mumbai" required>
+                        </div>
+                         <div class="form-group">
+                            <label for="address-pincode">Pincode</label>
+                            <input type="text" id="address-pincode" name="pincode" class="form-group-input" placeholder="e.g., 400001" required>
+                        </div>
+                        <button type="submit" class="auth-btn">Save Details</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="booking-modal" class="modal-overlay hidden">
+        <div class="modal-content booking-modal-content">
+            <div class="modal-header">
+                <h3 id="booking-modal-title">Book a Slot</h3>
+                <button id="booking-modal-close-btn" class="modal-nav-btn booking-modal-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="booking-modal-body" class="modal-body">
+                <!-- Booking content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="review-modal" class="modal-overlay hidden">
+        <div class="modal-content profile-modal-content">
+            <div class="modal-header">
+                <h3 id="review-modal-title">Leave a Review</h3>
+                <button id="review-modal-close-btn" class="modal-nav-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body profile-modal-body">
+                <form id="review-form" novalidate>
+                    <input type="hidden" id="review-id-input">
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div class="interactive-star-rating" id="review-star-rating-input">
+                            <i class="far fa-star" data-rating="1"></i>
+                            <i class="far fa-star" data-rating="2"></i>
+                            <i class="far fa-star" data-rating="3"></i>
+                            <i class="far fa-star" data-rating="4"></i>
+                            <i class="far fa-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="review-rating-value" name="rating" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="review-comment-input">Your Comments</label>
+                        <textarea id="review-comment-input" class="form-group-input" rows="5" placeholder="Tell us about your experience..."></textarea>
+                    </div>
+                    <button type="submit" class="auth-btn">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="upload-progress-overlay" class="loading-overlay hidden">
+        <div class="progress-container">
+            <p id="upload-progress-title">Uploading File...</p>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="upload-progress-bar"></div>
+            </div>
+            <span id="upload-progress-text">0%</span>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
+    </div>
+
+    <!-- Service Detail Modal -->
+    <div id="service-detail-modal" class="modal-overlay hidden">
+        <div class="modal-content service-detail-content">
+            <div class="modal-header">
+                <button id="service-detail-back-btn" class="modal-nav-btn"><i class="fas fa-arrow-left"></i></button>
+                <h3 id="service-detail-modal-title">Service Details</h3>
+                 <button id="service-detail-share-btn" class="modal-nav-btn"><i class="fas fa-share-alt"></i></button>
+            </div>
+            <div class="modal-body service-detail-body" id="service-detail-body-content">
+                <!-- Service details will be injected here -->
+            </div>
+            <div class="service-detail-footer" id="service-detail-footer-content">
+                <!-- Sticky footer with price and button will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Summary Modal -->
+    <div id="order-details-summary-modal" class="modal-overlay hidden">
+        <div class="modal-content profile-modal-content">
+            <div class="modal-header">
+                <h3 id="order-summary-modal-title">Order Details</h3>
+                <button id="order-summary-modal-close-btn" class="modal-nav-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body profile-modal-body" id="order-summary-modal-body">
+                <!-- Order summary will be injected here -->
+            </div>
+        </div>
+    </div>
+    <!-- ..................End Modals................... -->
+    
+    <div id="notification-container"></div>
+
+<script type="module" src="/index.js"></script>
+</body>
+
+</html>
